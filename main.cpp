@@ -2,6 +2,9 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <windows.h>
+#include <shlobj.h>
+#include <objbase.h>
 #include <dirent.h>
 #include <zip.h>
 
@@ -9,10 +12,21 @@ int startsWith(std::string file, std::string compare) {
 	if (!file.compare(0,10,compare)) {
 		return 1;
 	}
-	else {
-		return 0;
-	}
+	
+	return 0;
 }
+
+LPWSTR getDownloadPath() {
+	LPWSTR wszPath = NULL;
+	HRESULT hr;
+
+	hr = SHGetKnownFolderPath(FOLDERID_Downloads, 0, NULL, &wszPath);
+		
+	CoTaskMemFree(wszPath);
+	
+	return wszPath;
+}
+
 
 std::vector<std::string> directoryGrab() {
 	DIR *dir;
@@ -21,7 +35,7 @@ std::vector<std::string> directoryGrab() {
 	std::vector<std::string> directoryList;
 	std::string filePrefix = "esea_match";
 	
-	if ((dir = opendir ("C:\\Users\\distant\\Downloads")) != NULL) {
+	if ((dir = opendir ("C:\\%USERPROFILE%\\Downloads\\")) != NULL) {
 	/* print all the files and directories within directory */
 	while ((ent = readdir (dir)) != NULL) {
 		if (startsWith(ent->d_name, filePrefix)) {
@@ -46,7 +60,7 @@ int main() {
 
 	//Open the ZIP archive
 	int err = 0;
-	std::string demo = "C:\\Users\\distant\\Downloads\\" + directoryGrab()[6];
+	std::string demo = "C:\\%USERPROFILE%\\Downloads\\" + directoryGrab()[6];
     zip *z = zip_open(demo.c_str(), 0, &err);
 
     //Get file name
